@@ -1,46 +1,46 @@
 rm(list = ls())
 options(stringsAsFactors = F, digits = 4)
 
-## ´ÓÎÄ¼şÖĞ»ñµÃĞÕÃû
+## ä»æ–‡ä»¶ä¸­è·å¾—å§“å
 GetName <- function(ifile){
   mydata <- read.csv(ifile, header = TRUE)
   name <- unique(mydata$X4)
 }
 
-## ¶Ôµ¥¸öÃû×Ö½øĞĞÍ³¼Æ
+## å¯¹å•ä¸ªåå­—è¿›è¡Œç»Ÿè®¡
 CountTime <- function(name, ifile){
   xm <- name
   mydata <- read.csv(ifile, header = TRUE)
   sign <- data.frame(mydata[grep(xm, mydata$X4), (5)])
   colnames(sign) <- "ttime"
   
-  ## ½«ÈÕÆÚÊ±¼ä²ğ·Ö³ÉÈÕÆÚºÍÊ±¼ä
+  ## å°†æ—¥æœŸæ—¶é—´æ‹†åˆ†æˆæ—¥æœŸå’Œæ—¶é—´
   day_time <- strsplit(sign$ttime, " ")
   day  <- sapply(day_time, "[", 1)
   time <- sapply(day_time, "[", 2)
   
-  ## Í³¼ÆÈÕÆÚ
+  ## ç»Ÿè®¡æ—¥æœŸ
   uday <- unique(day)
   gzts <- length(uday)
   fd <- as.character(as.Date(uday[1]))
   ld <- as.character(as.Date(uday[length(uday)]))
   
-  ## ½«´ò¿¨¼ÇÂ¼²ğ·Ö³ÉÁĞ±í£¬Ã¿¸öÖµ±íÊ¾Ä³Ò»ÌìµÄ´ò¿¨¼ÇÂ¼Êı¾İ¿ò
+  ## å°†æ‰“å¡è®°å½•æ‹†åˆ†æˆåˆ—è¡¨ï¼Œæ¯ä¸ªå€¼è¡¨ç¤ºæŸä¸€å¤©çš„æ‰“å¡è®°å½•æ•°æ®æ¡†
   cday <- c()
   for (i in seq(1:length(uday))){
     cday[i] <- data.frame(sign[grep(uday[i], sign$ttime), ])
   }
-  gzr <- c("ĞÇÆÚÒ»","ĞÇÆÚ¶ş","ĞÇÆÚÈı","ĞÇÆÚËÄ","ĞÇÆÚÎå")
+  gzr <- c("æ˜ŸæœŸä¸€","æ˜ŸæœŸäºŒ","æ˜ŸæœŸä¸‰","æ˜ŸæœŸå››","æ˜ŸæœŸäº”")
   counttime <- c()
   cd = 0
-  ## ¼ÆËãÃ¿ÌìµÄ´ò¿¨Ê±³¤£¬Éú³Éº¬Ã¿ÌìÊ±³¤µÄÊı¾İÏòÁ¿
+  ## è®¡ç®—æ¯å¤©çš„æ‰“å¡æ—¶é•¿ï¼Œç”Ÿæˆå«æ¯å¤©æ—¶é•¿çš„æ•°æ®å‘é‡
   for (i in seq(1:length(cday))){
     x <- as.POSIXct(cday[[i]][1])
     y <- as.POSIXct(cday[[i]][length(cday[[i]])])
     t <- gsub(":", "", strsplit(cday[[i]][1], split = " ")[[1]][2])
     counttime[i] <- difftime(y, x, units = "mins")
     if (format(as.Date(uday[i]), format = "%A") %in% gzr) {
-      if (t > 830) cd = cd + 1  # ¹¤×÷ÈÕ³Ùµ½ÌìÊı
+      if (t > 830) cd = cd + 1  # å·¥ä½œæ—¥è¿Ÿåˆ°å¤©æ•°
     }
   }
   zsc <- sum(counttime)/60
@@ -48,13 +48,13 @@ CountTime <- function(name, ifile){
   countresult <- data.frame(xm, fd, ld, gzts, zsc, cd, yxsc)
 }
 
-## Í³¼ÆÎÄ¼şÖĞËùÓĞÈËµÄ´ò¿¨Çé¿ö
+## ç»Ÿè®¡æ–‡ä»¶ä¸­æ‰€æœ‰äººçš„æ‰“å¡æƒ…å†µ
 Record <- function(inputfile){
   name <- GetName(ifile = inputfile)
   record <- data.frame()
   for (i in 1:length(name)){
-    line <- CountTime(name = name[i], ifile = "sign.CSV")
-    colnames(line) <- c("ĞÕÃû", "µÚÒ»Ìì", "×îºóÒ»Ìì", "¹¤×÷ÌìÊı", "×ÜÊ±³¤", "³Ùµ½´ÎÊı", "ÓĞĞ§Ê±³¤")
+    line <- CountTime(name = name[i], ifile = inputfile)
+    colnames(line) <- c("å§“å", "ç¬¬ä¸€å¤©", "æœ€åä¸€å¤©", "å·¥ä½œå¤©æ•°", "æ€»æ—¶é•¿", "è¿Ÿåˆ°æ¬¡æ•°", "æœ‰æ•ˆæ—¶é•¿")
     record <- rbind(record, line)
   }
   write.table(record, file = "record.csv", sep = ",",row.names = FALSE)
